@@ -1,3 +1,12 @@
 {
-  "roles": ["rock", "paper", "scissor"]
+  "rock": {
+    "defeats" : ["scissors"],
+    "defeated_by": ["paper"]
+  },"paper": {
+    "defeats" : ["rock"],
+    "defeated_by": ["scissors"]
+  },"scissors": {
+    "defeats" : ["paper"],
+    "defeated_by": ["rock"]
+  }
 }
