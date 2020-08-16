@@ -1,4 +1,3 @@
-# :TODO: rock paper scisors
 # greet user
 # ask user for input
 # validate input
@@ -17,17 +16,39 @@ def main():
 
 
 def play_game(roles):
-    # :TODO: play a game
+    best_of = 3
     show_header()
-    p1 = get_player()
+    player = get_player()
+    computer = 'computer'
+
+    player_score = 0
+    computer_score = 0
 
     winner = None
-    player_index = pick_first()
     while not winner:
-        role = make_a_play(roles)
-        player_index = toggle_player(player_index)
-        if check_winner():
-            print(f"Congratulations, {winner}! you won!")
+        throw = get_throw(roles)
+
+        print()
+
+        throw_winner = check_throw_winner(player, computer, throw, roles)
+
+        if throw_winner == player:
+            player_score += 1
+            print(f"{player} won this throw!")
+        elif throw_winner == computer:
+            computer_score += 1
+            print(f"{computer} won this throw!")
+        else:
+            print('this throw as a tie!')
+
+        print(f"{player} threw {throw[0]} and {computer} threw {throw[1]}")
+        print(f"The score is {player_score} : {computer_score}")
+
+        winner = get_winner(player, computer, player_score, computer_score, best_of)
+        if winner == player:
+            print(f"congratulations {player}! you won with the score of {player_score} : {computer_score}")
+        elif winner == computer:
+            print(f"You lost! the {computer} won with a score of {computer_score} : {player_score}")
 
 
 def load_roles():
@@ -53,56 +74,66 @@ def show_header():
 def get_player():
     player = ''
     while not player.strip():
-        player = input("What's your name?")
+        player = input("What's your name?").strip()
         if not player.strip():
             print("You cannot put an empty name")
+        else:
+            return player
 
 
-def pick_first():
-    player_input = ['me', '0']
-    computer_input = ['pc', '1']
-    random_input = ['rand', 'random']
-
-    pick = None
-
-    print(f'Who goes first? you or computer ({player_input[0]} / {computer_input[0]}) or ({player_input[1]}) '
-                 f'/ {computer_input[1]}) or even ({random_input[0]} / {random_input[1]})')
-    while pick not in player_input or pick not in computer_input or pick not in random_input:
-        pick = input('feel free to pick').strip()
-        if pick in player_input:
-            return 0
-        elif pick in computer_input:
-            return 1
-        elif pick in random_input:
-            return random.randint(0,1)
-        elif not pick or pick not in [player_input,computer_input,random_input]:
-            print(f"if you don't want to pick anything just say {random_input[0]} or {random_input[1]} "
-                  f"but not an empty string")
-            print()
-            continue
-
-
-def make_a_play(roles):
-    role = ''
+def get_throw(roles):
     available_roles = [key for key in roles]
-    #TODO: make sure to split this func into 2 for human and computer player
+
+    plays = []
+
+    computers_play = None
+    users_play = None
+    while not users_play and not computers_play:
+        users_play = user_play(available_roles)
+        computers_play = computer_play(available_roles)
+    plays.append(users_play)
+    plays.append(computers_play)
+    return plays
+
+
+def computer_play(available_roles):
+    return random.choice(available_roles)
+
+
+def user_play(available_roles):
+    role = None
     while role not in available_roles:
         print()
-        role = input(f"What do you want to play? ({available_roles})")
-        print(role)
+        role = input(f"What do you want to play? {available_roles}")
         if role in available_roles:
             return role
         else:
             print(f"that's not a valid move! try any of these {available_roles} inside except")
 
 
-def toggle_player(player_index):
-    return (player_index + 1) % 2
+def check_throw_winner(player1, player2, throws, roles):
+    winner = None
+    player_throw = throws[0]
+    computer_throw = throws[1]
+
+    outcome = roles.get(player_throw, {})
+    if computer_throw in outcome.get('defeats'):
+        return player1
+    elif computer_throw in outcome.get('defeated_by'):
+        return player2
+
+    return winner
 
 
-def check_winner():
-    #TODO: make the function to check if there is a winner
-    pass
+def get_winner(player1, player2, player1_score, player2_score, best_of):
+    if player1_score > best_of or player2_score > best_of:
+        raise ValueError('score cannot exceed the best of')
+    if player1_score == best_of:
+        return player1
+    elif player2_score == best_of:
+        return player2
+    else:
+        pass
 
 
 if __name__ == '__main__':
